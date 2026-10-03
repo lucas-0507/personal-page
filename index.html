@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script>try{if(location.hash==='#footprint')document.documentElement.classList.add('fp-start');}catch(e){}</script><title>HCB · 一个有点理想主义的懒人 | v5.4</title>
+<script>try{if(location.hash==='#footprint')document.documentElement.classList.add('fp-start');}catch(e){}</script><title>个人小站</title>
 <style>
 
   /* ===== 设计令牌 ===== */
@@ -546,6 +546,11 @@
   /* ===== 看板娘层级修复 ===== */
   #oml2d-stage{z-index:100000!important;position:fixed!important;bottom:0!important;right:0!important;display:block!important;}
   #oml2d-canvas{z-index:100000!important;display:block!important;}
+  /* ===== 移动端看板娘适配：缩小舞台，绝不溢出屏幕 ===== */
+  @media(max-width:768px){
+    #oml2d-stage{max-width:50vw!important;max-height:34vh!important;right:2px!important;}
+    #oml2d-canvas{max-width:50vw!important;max-height:34vh!important;width:auto!important;height:auto!important;}
+  }
 
   /* ===== 移动端 ===== */
   @media(max-width:768px){
@@ -4061,7 +4066,7 @@ void main()
       try {
         OML2D.loadOml2d({
           dockedPosition: "right",
-          models: [{ path: path, position: [0, 0], scale: 0.14, stageStyle: { width: 280, height: 380, background: "transparent" } }],
+          models: [{ path: path, position: [0, 0], scale: 0.14, stageStyle: { width: (window.innerWidth <= 768 ? 176 : 280), height: (window.innerWidth <= 768 ? 240 : 380), background: "transparent" } }],
           tips: {
             idleTips: { wordTheDay: false, message: [], duration: 5000, interval: 999999, priority: 2 },
             welcomeTips: { message: { daybreak: "", morning: "", noon: "", afternoon: "", dusk: "", night: "", lateNight: "", weeHours: "" }, duration: 0, priority: 3 },
@@ -4082,11 +4087,12 @@ void main()
       if (!stageCanvas){ setTimeout(bindYuzu, 500); return; }
       var stage = stageCanvas.parentElement;
       if (!stage){ setTimeout(bindYuzu, 500); return; }
+      var yuzuMob = window.innerWidth <= 768;
       stage.style.position = "fixed";
       stage.style.zIndex = "90";
-      stage.style.right = "10px";
+      stage.style.right = yuzuMob ? "4px" : "10px";
       stage.style.left = "auto";
-      stage.style.top = Math.max(0, window.innerHeight - 360) + "px";
+      stage.style.top = Math.max(0, window.innerHeight - (yuzuMob ? 246 : 360)) + "px";
       stage.style.bottom = "auto";
       stage.style.transition = "transform .8s cubic-bezier(.22,1,.36,1)";
       stage.style.transform = "translateY(0)";
@@ -4241,7 +4247,7 @@ void main()
       if (!path) return;
       try {
         OML2D.loadOml2d({
-          models: [{ path: path, position: [0, 0], scale: 0.14, stageStyle: { width: 280, height: 380, background: "transparent" } }],
+          models: [{ path: path, position: [0, 0], scale: 0.14, stageStyle: { width: (window.innerWidth <= 768 ? 176 : 280), height: (window.innerWidth <= 768 ? 240 : 380), background: "transparent" } }],
           tips: {
             idleTips: { wordTheDay: false, message: [], duration: 1, interval: 999999, priority: 0 },
             welcomeTips: { message: { daybreak: "", morning: "", noon: "", afternoon: "", dusk: "", night: "", lateNight: "" }, interval: 999999 },
@@ -4279,11 +4285,13 @@ void main()
       if (!stageCanvas){ setTimeout(bindAzusa, 500); return; }
       var st = stageCanvas.parentElement;
       if (!st){ setTimeout(bindAzusa, 500); return; }
+      var azuMob = window.innerWidth <= 768;
+      var AZUSA_BOX_W = azuMob ? 176 : 280;
       st.style.position = "fixed";
       st.style.zIndex = "90";
-      st.style.right = "10px";
+      st.style.right = azuMob ? "4px" : "10px";
       st.style.left = "auto";
-      st.style.top = Math.max(0, window.innerHeight - 360) + "px";
+      st.style.top = Math.max(0, window.innerHeight - (azuMob ? 246 : 360)) + "px";
       st.style.bottom = "auto";
       st.style.transition = "transform .8s cubic-bezier(.22,1,.36,1)";
       st.style.transform = "translateY(0)";
@@ -4292,7 +4300,12 @@ void main()
       st.style.userSelect = "none";
       try {
         var pos = JSON.parse(localStorage.getItem('azusa-pos'));
-        if (pos && pos.x != null){ st.style.left = pos.x + "px"; st.style.top = pos.y + "px"; st.style.right = "auto"; st.style.bottom = "auto"; }
+        if (pos && pos.x != null){
+          // 边界钳制：防止小屏/旋转后被拖到屏幕外找不到
+          var cx = Math.max(0, Math.min(window.innerWidth - AZUSA_BOX_W, pos.x));
+          var cy = Math.max(0, Math.min(window.innerHeight - 60, pos.y));
+          st.style.left = cx + "px"; st.style.top = cy + "px"; st.style.right = "auto"; st.style.bottom = "auto";
+        }
       } catch(e){}
       var bubble = makeBubble();
       function showBubble(text){
